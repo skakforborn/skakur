@@ -1,3 +1,5 @@
+// Existing code...
+
 let whiteTime = 0;
 let blackTime = 0;
 let whiteInterval;
@@ -10,9 +12,6 @@ let blackMoves = 0;
 let currentMoveColor = 'white';
 let moveNumberInput;
 let incrementTime;
-let whiteMoveCounter = 0;
-let blackMoveCounter = 0;
-let incrementStarted = false;
 
 function startTimer(color) {
   const time = color === 'white' ? whiteTime : blackTime;
@@ -43,66 +42,11 @@ function startTimer(color) {
       } else {
         blackTime = timer;
       }
-      handleMoveCompletion();
+      handleMoveCompletion(color);
     }
   }, 1000);
 
   return interval;
-}
-
-function setTimer() {
-  const whiteTimeInput = document.getElementById('whiteTime').value;
-  const blackTimeInput = document.getElementById('blackTime').value;
-  const incrementTimeInput = document.getElementById('incrementTime').value;
-  moveNumberInput = parseInt(document.getElementById('moveNumber').value);
-
-  whiteTime = calculateTime(whiteTimeInput);
-  blackTime = calculateTime(blackTimeInput);
-  incrementTime = calculateTime(`00:${incrementTimeInput}`);
-
-  console.log(`White time: ${whiteTime}`);
-  console.log(`Black time: ${blackTime}`);
-  console.log(`Increment time: ${incrementTimeInput}`);
-  console.log(`Increment starts from move: ${moveNumberInput}`);
-}
-
-function calculateTime(timeInput) {
-  const [hours = 0, minutes = 0, seconds = 0] = timeInput.split(':').map(Number);
-  return (hours * 60 * 60) + (minutes * 60) + seconds;
-}
-
-function handleMoveCompletion() {
-  if (!incrementStarted) {
-    if (currentMoveColor === 'white') {
-      whiteMoveCounter++;
-      if (whiteMoveCounter === moveNumberInput) {
-        incrementStarted = true;
-        whiteMoveCounter = 0;
-      }
-    } else {
-      blackMoveCounter++;
-      if (blackMoveCounter === moveNumberInput) {
-        incrementStarted = true;
-        blackMoveCounter = 0;
-      }
-    }
-  }
-
-  if (incrementStarted) {
-    if (currentMoveColor === 'white') {
-      whiteMoves++;
-      if (whiteMoves > moveNumberInput && (whiteMoves - moveNumberInput) % moveNumberInput === 0) {
-        whiteTime += incrementTime;
-      }
-    } else {
-      blackMoves++;
-      if (blackMoves > moveNumberInput && (blackMoves - moveNumberInput) % moveNumberInput === 0) {
-        blackTime += incrementTime;
-      }
-    }
-  }
-
-  currentMoveColor = currentMoveColor === 'white' ? 'black' : 'white';
 }
 
 document.addEventListener('keydown', function (event) {
@@ -122,9 +66,59 @@ document.addEventListener('keydown', function (event) {
       whiteInterval = startTimer('white');
     }
   }
-    
-
-
 });
+
+function setTimer() {
+  clearInterval(whiteInterval); // Clear existing intervals
+  clearInterval(blackInterval);
+
+  whitePaused = true; // Pause the timers
+  blackPaused = true;
+
+  const whiteTimeInput = document.getElementById('whiteTime').value;
+  const blackTimeInput = document.getElementById('blackTime').value;
+  const incrementTimeInput = document.getElementById('incrementTime').value;
+  moveNumberInput = parseInt(document.getElementById('moveNumber').value);
+
+  whiteTime = calculateTime(whiteTimeInput); // Update timer values
+  blackTime = calculateTime(blackTimeInput);
+  incrementTime = calculateTime(`00:${incrementTimeInput}`);
+
+  console.log(`White time: ${whiteTime}`);
+  console.log(`Black time: ${blackTime}`);
+  console.log(`Increment time: ${incrementTimeInput}`);
+  console.log(`Increment starts from move: ${moveNumberInput}`);
+
+  document.getElementById('whiteTimer').innerHTML = '00:00'; // Update timer display
+  document.getElementById('blackTimer').innerHTML = '00:00';
+
+  whiteMoves = 0; // Reset move counters
+  blackMoves = 0;
+  currentMoveColor = 'white'; // Reset move color to white
+}
+
+function calculateTime(timeInput) {
+  const [hours = 0, minutes = 0, seconds = 0] = timeInput.split(':').map(Number);
+  return (hours * 60 * 60) + (minutes * 60) + seconds;
+}
+
+// ... (existing code)
+
+function handleMoveCompletion(color) {
+  if (color === 'white') {
+    if (whiteMoves >= 2 * moveNumberInput) {
+      whiteTime += incrementTime;
+    }
+    whiteMoves++;
+  } else {
+    if (blackMoves >= 2 * moveNumberInput) {
+      blackTime += incrementTime;
+    }
+    blackMoves++;
+  }
+
+  currentMoveColor = color === 'white' ? 'black' : 'white';
+}
+
 
 
